@@ -1,0 +1,6 @@
+{:server-port         4000
+ :database-properties {:host     "127.0.0.1"
+                       :dbname   "example"
+                       :user     "postgres"
+                       :password "landonjw123"
+                       :port     5432}}
