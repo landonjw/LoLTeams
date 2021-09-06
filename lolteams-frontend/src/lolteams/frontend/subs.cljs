@@ -6,3 +6,13 @@
   ::ping-response
   (fn [db]
     (get db :ping)))
+
+(re-frame/reg-sub
+  ::champion-portrait
+  (fn [db]
+    (get db :champion-portrait)))
+
+(re-frame/reg-sub
+  ::champion-input
+  (fn [db]
+    (get db :selected-champion)))
