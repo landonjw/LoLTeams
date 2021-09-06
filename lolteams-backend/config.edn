@@ -1,6 +1,7 @@
 {:server-port         4000
  :database-properties {:host     "127.0.0.1"
-                       :dbname   "example"
+                       :dbname   "lolteams"
                        :user     "postgres"
                        :password "landonjw123"
-                       :port     5432}}
+                       :port     5432}
+ :data-dragon {:version-refresh-rate-minutes 60}}

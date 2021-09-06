@@ -1,15 +1,17 @@
 (ns lolteams.backend.core
   (:require [org.httpkit.server :refer [run-server]]
+            [lolteams.backend.config :refer [config]]
             [reitit.ring :as ring]
             [reitit.ring.middleware.exception :refer [exception-middleware]]
             [reitit.ring.middleware.muuntaja :refer [format-negotiate-middleware
                                                      format-response-middleware
                                                      format-request-middleware]]
+            [reitit.ring.middleware.parameters :refer [parameters-middleware]]
             [muuntaja.core :as muuntaja]
             [next.jdbc :as jdbc]
-            [lolteams.backend.controllers.ping :as ping-controller]))
-
-(def config (clojure.edn/read-string (slurp "config.edn")))
+            [lolteams.backend.controllers.ping :as ping-controller]
+            [lolteams.backend.controllers.ddragon.champion :as champion-controller]
+            [chime.core :refer [chime-at periodic-seq]]))
 
 (defonce datasource (atom nil))
 (defonce server (atom nil))
@@ -17,9 +19,11 @@
 (def app
   (ring/ring-handler
     (ring/router
-      [["api/v1/ping" {:get ping-controller/ping-get}]]
-      {:data {:muuntaja muuntaja/instance
+      [["/api/v1/ping" {:get ping-controller/ping-get-handler}]
+       ["/api/v1/datadragon/champion/portrait" {:get champion-controller/portrait-get-handler}]]
+      {:data {:muuntaja   muuntaja/instance
               :middleware [format-negotiate-middleware
+                           parameters-middleware
                            format-response-middleware
                            exception-middleware
                            format-request-middleware]}})
