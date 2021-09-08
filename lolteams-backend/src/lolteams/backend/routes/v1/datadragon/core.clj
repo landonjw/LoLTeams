@@ -1,4 +1,4 @@
-(ns lolteams.backend.riot.ddragon.data-dragon
+(ns lolteams.backend.routes.v1.datadragon.core
   (:require [org.httpkit.client :as http]
             [lolteams.backend.config :refer [config]]
             [clojure.data.json :as json]

@@ -1,5 +1,5 @@
-(ns lolteams.backend.riot.ddragon.assets.champion-assets
-  (:require [lolteams.backend.riot.ddragon.data-dragon :refer [cdn-uri]]))
+(ns lolteams.backend.routes.v1.datadragon.champion-assets
+  (:require [lolteams.backend.routes.v1.datadragon.core :refer [cdn-uri]]))
 
 (defn equals-ignore-case? [string-1 string-2]
   "Evaluates if two strings are equal, without accounting for case sensitivity.
