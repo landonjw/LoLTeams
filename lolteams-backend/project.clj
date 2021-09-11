@@ -11,7 +11,11 @@
                  [org.clojure/data.json "2.4.0"]
                  [org.clojure/core.cache "1.0.217"]
                  [jarohen/chime "0.3.3"]
-                 [buddy/buddy-hashers "1.8.1"]]
+                 [buddy/buddy-hashers "1.8.1"]
+                 [buddy/buddy-sign "3.4.1"]
+                 [buddy/buddy-auth "3.0.1"]
+                 [clj-time "0.14.2"]
+                 [ring-cors "0.1.13"]]
   :main ^:skip-aot lolteams.backend.core
   :plugins [[lein-ring "0.12.5"]]
   :ring {:handler lolteams.backend.core/app}

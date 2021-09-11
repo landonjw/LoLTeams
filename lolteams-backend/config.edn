@@ -4,4 +4,7 @@
                        :user     "postgres"
                        :password "landonjw123"
                        :port     5432}
- :data-dragon {:version-refresh-rate-minutes 60}}
+ :data-dragon {:version-refresh-rate-minutes 60}
+ :auth {:public-key-filename "dev_public_key.pem"
+        :private-key-filename "dev_private_key.pem"
+        :passphrase nil}}

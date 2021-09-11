@@ -1,0 +1,19 @@
+.login-panel {
+    width: 500px;
+    margin-top: 200px;
+}
+
+.center-text {
+    text-align: center;
+}
+
+.login-button {
+    width: 100%;
+}
+
+.champion-portrait {
+    width: 50%;
+    display: block;
+    margin-left: auto;
+    margin-right: auto;
+}

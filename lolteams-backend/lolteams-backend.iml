@@ -15,13 +15,17 @@
     <orderEntry type="sourceFolder" forTests="false" />
     <orderEntry type="library" name="Leiningen: borkdude/dynaload:0.2.2" level="project" />
     <orderEntry type="library" name="Leiningen: borkdude/edamame:0.0.11" level="project" />
+    <orderEntry type="library" name="Leiningen: buddy/buddy-auth:3.0.1" level="project" />
     <orderEntry type="library" name="Leiningen: buddy/buddy-core:1.10.1" level="project" />
     <orderEntry type="library" name="Leiningen: buddy/buddy-hashers:1.8.1" level="project" />
+    <orderEntry type="library" name="Leiningen: buddy/buddy-sign:3.4.1" level="project" />
     <orderEntry type="library" name="Leiningen: camel-snake-kebab:0.4.2" level="project" />
     <orderEntry type="library" name="Leiningen: cheshire:5.8.0" level="project" />
+    <orderEntry type="library" name="Leiningen: clj-time:0.14.2" level="project" />
     <orderEntry type="library" name="Leiningen: clj-tuple:0.2.2" level="project" />
     <orderEntry type="library" name="Leiningen: clojure-complete:0.2.5" level="project" />
     <orderEntry type="library" name="Leiningen: clojurewerkz/scrypt:1.2.0" level="project" />
+    <orderEntry type="library" name="Leiningen: clout:2.2.1" level="project" />
     <orderEntry type="library" name="Leiningen: com.bhauman/spell-spec:0.1.2" level="project" />
     <orderEntry type="library" name="Leiningen: com.cognitect/transit-clj:1.0.324" level="project" />
     <orderEntry type="library" name="Leiningen: com.cognitect/transit-java:1.0.343" level="project" />
@@ -42,9 +46,11 @@
     <orderEntry type="library" name="Leiningen: expound:0.8.9" level="project" />
     <orderEntry type="library" name="Leiningen: fipp:0.6.24" level="project" />
     <orderEntry type="library" name="Leiningen: http-kit:2.4.0" level="project" />
+    <orderEntry type="library" name="Leiningen: instaparse:1.4.8" level="project" />
     <orderEntry type="library" name="Leiningen: jarohen/chime:0.3.3" level="project" />
     <orderEntry type="library" name="Leiningen: javax.servlet/servlet-api:2.5" level="project" />
     <orderEntry type="library" name="Leiningen: javax.xml.bind/jaxb-api:2.3.0" level="project" />
+    <orderEntry type="library" name="Leiningen: joda-time:2.9.7" level="project" />
     <orderEntry type="library" name="Leiningen: lambdaisland/deep-diff:0.0-47" level="project" />
     <orderEntry type="library" name="Leiningen: meta-merge:1.0.0" level="project" />
     <orderEntry type="library" name="Leiningen: metosin/jsonista:0.3.3" level="project" />
@@ -91,6 +97,7 @@
     <orderEntry type="library" name="Leiningen: potemkin:0.4.5" level="project" />
     <orderEntry type="library" name="Leiningen: prismatic/schema:1.1.12" level="project" />
     <orderEntry type="library" name="Leiningen: riddley:0.1.12" level="project" />
+    <orderEntry type="library" name="Leiningen: ring-cors:0.1.13" level="project" />
     <orderEntry type="library" name="Leiningen: ring/ring-codec:1.0.1" level="project" />
     <orderEntry type="library" name="Leiningen: ring/ring-core:1.9.4" level="project" />
     <orderEntry type="library" name="Leiningen: ring/ring-mock:0.3.2" level="project" />

@@ -16,3 +16,13 @@
   ::champion-input
   (fn [db]
     (get db :selected-champion)))
+
+(re-frame/reg-sub
+  ::login-credentials
+  (fn [db]
+    (get db :login-credentials {:email "" :password ""})))
+
+(re-frame/reg-sub
+  ::ping-response
+  (fn [db]
+    (get db :ping)))
