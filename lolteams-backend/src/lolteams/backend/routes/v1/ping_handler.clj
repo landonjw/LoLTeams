@@ -3,5 +3,4 @@
             [ring.util.http-response :refer :all]))
 
 (defn ping-get [request]
-  (auth/wrap-authorization request
-                           #(ok "Pong")))
+  (auth/wrap-authentication request #(ok "Pong")))

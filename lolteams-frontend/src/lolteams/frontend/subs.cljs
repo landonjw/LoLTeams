@@ -26,3 +26,13 @@
   ::ping-response
   (fn [db]
     (get db :ping)))
+
+(re-frame/reg-sub
+  ::active-page
+  (fn [db]
+    (get db :active-page)))
+
+(re-frame/reg-sub
+  ::debug-mode?
+  (fn [db]
+    (get db :debug-mode? false)))

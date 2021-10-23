@@ -1,6 +1,20 @@
 .login-panel {
-    width: 500px;
+    width: 25%;
     margin-top: 200px;
+}
+
+.forgot-password-panel {
+    width: 25%;
+    margin-top: 200px;
+}
+
+.register-panel {
+    width: 25%;
+    margin-top: 200px;
+}
+
+.forgot-password-header {
+    padding: 8px;
 }
 
 .center-text {
@@ -8,6 +22,10 @@
 }
 
 .login-button {
+    width: 100%;
+}
+
+.full-width {
     width: 100%;
 }
 

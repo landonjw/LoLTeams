@@ -2,37 +2,15 @@
   (:require
     [re-frame.core :refer [subscribe dispatch]]
     [lolteams.frontend.events :as events]
-    [lolteams.frontend.subs :as subs]))
+    [lolteams.frontend.subs :as subs]
+    [lolteams.frontend.debug :as debug]
+    [lolteams.frontend.views.elements.authentication :as auth]))
 
 (defn response []
   (let [res (subscribe [::subs/ping-response])]
     [:div
      [:h1 "Response"]
      [:p (or @res "N/A")]]))
-
-(defn login-panel []
-  [:div.container.login-panel
-   [:form.box
-    [:div.field
-     [:div.control.has-icons-left
-      [:input.input {:type        "email"
-                     :placeholder "Email"
-                     :on-change   #(dispatch [::events/login-input :username (-> % .-target .-value)])}]
-      [:span.icon.is-small.is-left
-       [:i.fa.fa-envelope]]]]
-    [:div.field
-     [:div.control.has-icons-left
-      [:input.input {:type        "password"
-                     :placeholder "Password"
-                     :on-change   #(dispatch [::events/login-input :password (-> % .-target .-value)])}]
-      [:span.icon.is-small.is-left
-       [:i.fa.fa-lock]]]]
-    [:button.button.is-primary.login-button {:type     "button"
-                                             :on-click #(dispatch [::events/attempt-login])} "Login"]
-    [:div.center-text
-     [:a "Forgot your password? Reset here."]]
-    [:div.center-text
-     [:a "New? Register here!"]]]])
 
 (defn champion-input []
   [:form.box.container.login-panel
@@ -63,7 +41,24 @@
        [:button.modal-close.is-large {:type     "button"
                                       :on-click #(dispatch [::events/clear-champion-portrait])}]])))
 
+(defmulti page identity)
+
+(defmethod page :login []
+  [auth/login-panel])
+
+(defmethod page :forgot-password []
+  [auth/forgot-password])
+
+(defmethod page :register []
+  [auth/register-panel])
+
+(defmethod page :default []
+  [:div "No page"])
+
 (defn main-panel []
-  [:div
-   [login-panel]
-   [ping-panel]])
+  (let [active-page (subscribe [::subs/active-page])
+        debug-mode? (subscribe [::subs/debug-mode?])]
+    [:div
+     (if @debug-mode?
+       [debug/page-navigation-bar])
+     [page @active-page]]))

@@ -78,15 +78,20 @@
     (assoc-in db [:login-form input-type] value)))
 
 (re-frame/reg-event-db
-  ::auth-api-success
+  ::login-success
   (fn [db response]
     (assoc db :auth-token (second response))))
 
 ; TODO
 (re-frame/reg-event-db
-  ::auth-api-failure
+  ::login-failure
   (fn [db response]
-    (println "Failed to authenticate :(")))
+    (println response)))
+
+(re-frame/reg-event-db
+  ::change-page
+  (fn [db [_ page]]
+    (assoc db :active-page page)))
 
 (re-frame/reg-event-fx
   ::attempt-login
@@ -98,8 +103,8 @@
                   :timeout 8000
                   :format (ajax/json-request-format)
                   :response-format (ajax/detect-response-format)
-                  :on-success [::auth-api-success]
-                  :on-failure [::auth-api-failure]}}))
+                  :on-success [::login-success]
+                  :on-failure [::login-failure]}}))
 
 (re-frame/reg-event-db
   ::ping-success
@@ -116,3 +121,31 @@
                   :timeout 8000
                   :response-format (ajax/detect-response-format)
                   :on-success [::ping-success]}}))
+
+(re-frame/reg-event-db
+  ::forgot-password-form
+  (fn [db [_ email]]
+    (assoc-in db [:forgot-password-form :email] email)))
+
+(re-frame/reg-event-fx
+  ::attempt-register
+  (fn [state]
+    {:db state
+     :http-xhrio {:method :post
+                  :uri (endpoint "/v1/auth/register")
+                  :params (get-in state [:db :register-form])
+                  :timeout 8000
+                  :format (ajax/json-request-format)
+                  :response-format (ajax/detect-response-format)
+                  :on-success [::register-success]
+                  :on-failure [::register-failure]}}))
+
+(re-frame/reg-event-db
+  ::register-form
+  (fn [db input-type value]
+    (assoc-in db [:register-form input-type] value)))
+
+(re-frame/reg-event-fx
+  ::register-success
+  (fn [state]
+    (println state)))

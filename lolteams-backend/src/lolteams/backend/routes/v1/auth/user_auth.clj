@@ -33,7 +33,9 @@
 (defn authorized? [request]
   (boolean (:identity request)))
 
-(defn wrap-authorization [request fn]
+(defn wrap-authentication [request fn]
+  "Wraps a function in an authorization check.
+  If the user is not authorized"
   (if (authorized? request)
     (fn)
     (unauthorized)))
