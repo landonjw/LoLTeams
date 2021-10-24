@@ -13,9 +13,8 @@
         (unauthorized "Authentication error"))))
 
 (defn register-post [{params :body-params}]
-  (println params)
-  (let [{:keys [username email password]} params
-        create-result (user/create-user! username password email)]
+  (let [{:keys [username email password server in-game-name]} params
+        create-result (user/create-user! username password email server in-game-name)]
     (if (:success? create-result)
       (created "/" (user-auth/create-auth-token (:auth config) username))
       (bad-request (:message create-result)))))

@@ -1,7 +1,6 @@
 (ns lolteams.backend.core
   (:require [org.httpkit.server :refer [run-server]]
-            [lolteams.backend.config :refer [config]]
-            [lolteams.backend.database :as database]
+            [lolteams.backend.config :as config]
             [reitit.ring :as ring]
             [reitit.ring.middleware.exception :refer [exception-middleware]]
             [reitit.ring.middleware.muuntaja :refer [format-negotiate-middleware
@@ -9,62 +8,89 @@
                                                      format-request-middleware]]
             [reitit.ring.middleware.parameters :refer [parameters-middleware]]
             [muuntaja.core :as muuntaja]
-            [reitit.middleware :as middleware]
-            [lolteams.backend.routes.v1.ping-handler :as ping-handler]
-            [lolteams.backend.routes.v1.datadragon.champion-handler :as champion-handler]
-            [lolteams.backend.routes.v1.auth.auth-handler :as auth-handler]
+            [lolteams.backend.handlers.v1.auth :as auth-handler]
+            [lolteams.backend.handlers.v1.game-server :as game-server-handler]
+            [lolteams.backend.handlers.v1.debug :as debug-handler]
             [chime.core :refer [chime-at periodic-seq]]
-            [lolteams.backend.middleware :refer [jwt-auth-middleware]]
-            [ring.middleware.cors :refer [wrap-cors]]))
+            [lolteams.backend.middleware.auth :refer [jwt-auth-middleware]]
+            [lolteams.backend.middleware.cors :refer [cors-middleware]]
+            [lolteams.backend.datadragon.store :as data-dragon-store]
+            [next.jdbc :as jdbc]))
 
 (defonce server (atom nil))
+(defonce routes (atom nil))
+(defonce config (atom nil))
+(defonce database (atom nil))
+(defonce data-dragon (atom nil))
 
-(defn add-cors [handler]
-  (wrap-cors handler
-             :access-control-allow-origin [#".*"]
-             :access-control-allow-methods [:get :post]))
-
-(def app
+(defn create-routes [db config]
+  (println "Creating routes...")
   (ring/ring-handler
     (ring/router
-      [["/api/v1" {:middleware [add-cors]}
-        ["/ping" {:get        ping-handler/ping-get
-                  :middleware [jwt-auth-middleware]}]
-        ["/datadragon"
-         ["/champion"
-          ["portrait" {:get champion-handler/portrait-get}]]]
+      [["/api/v1" {:middleware [cors-middleware]}
+        ["/debug"
+         ["/ping"
+          ["/auth" {:get        debug-handler/ping-with-auth
+                    :middleware [#(jwt-auth-middleware config %)]}]
+          ["/noauth" {:get debug-handler/ping}]]]
         ["/auth"
-         ["/login" {:post auth-handler/login-post}]
-         ["/register" {:post auth-handler/register-post}]]]]
-      {:data                 {:muuntaja   muuntaja/instance
-                              :middleware [format-negotiate-middleware
-                                           parameters-middleware
-                                           format-response-middleware
-                                           exception-middleware
-                                           format-request-middleware]}})
+         ["/login" {:post (auth-handler/login-user db config)}]
+         ["/register" {:post (auth-handler/register-user db config)}]]
+        ["/gameserver"
+         ["/all" {:get (game-server-handler/get-all-servers db)}]]]]
+      {:data {:muuntaja   muuntaja/instance
+              :middleware [format-negotiate-middleware
+                           parameters-middleware
+                           format-response-middleware
+                           exception-middleware
+                           format-request-middleware]}})
     (ring/routes
       (ring/redirect-trailing-slash-handler)
       (ring/create-default-handler {:status 404
                                     :body   "Route not found"}))))
 
-(defn start-server! [port]
-  (println (str "Running server on port " port "."))
-  (reset! server (run-server app {:port port})))
+(defn create-datasource! [config]
+  (println "Connecting to database...")
+  (jdbc/get-datasource (:database-properties config)))
+
+(defn start-server! [config routes]
+  (println "Starting server...")
+  (let [port (:server-port config)
+        server (run-server routes {:port port})]
+    (println "Server running on port " port ".")
+    server))
 
 (defn stop-server! []
+  (println "Stopping server...")
   (@server :timeout 100)
   (reset! server nil))
 
+(defn reset-data-dragon! []
+  (println "Resetting data dragon...")
+  (reset! data-dragon (data-dragon-store/fetch-data-dragon-data!)))
+
 (defn restart-server! []
+  (println "Restarting server...")
   (stop-server!)
-  (start-server! (:server-port @config)))
+  (let [new-server (start-server! @config @routes)]
+    (reset! server new-server)))
+
+(defn reset-routes-and-server! []
+  (println "Resetting routes and server...")
+  (stop-server!)
+  (let [new-routes (create-routes @database @config)
+        new-server (start-server! @config new-routes)]
+    (reset! routes new-routes)
+    (reset! server new-server)))
 
 (defn -main []
-  (database/create-datasource! (database/database-properties config))
-  (start-server! (:server-port config)))
-
-(defn test-endpoint []
-  (app {:request-method :post
-        :uri            "/api/v1/auth/login"
-        :body-params    {:username "landonjw123"
-                         :password "foobar123"}}))
+  (let [new-config (config/create-config!)
+        new-data-dragon (data-dragon-store/fetch-data-dragon-data!)
+        new-database (create-datasource! new-config)
+        new-routes (create-routes new-database new-config)
+        new-server (start-server! new-config new-routes)]
+    (reset! config new-config)
+    (reset! data-dragon new-data-dragon)
+    (reset! routes new-routes)
+    (reset! database new-database)
+    (reset! server new-server)))

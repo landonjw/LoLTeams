@@ -11,12 +11,12 @@
 (defn password-validates? [password]
   (and (re-find #"[0-9]" password)                          ; Password has at least one digit
        (re-find #"[a-zA-Z]" password)                       ; Password has at least one alphabetical character
-       (<= 8 (count password))))                            ; Password length is at least 8
+       (<= 8 (count password))))                          ; Password length is at least 8
 
 (defn email-validates? [email]
   (re-find #"@" email))                                     ; Email contains an @
 
-(defn create-user! [username password email]
+(defn create-user! [username password email server in-game-name]
   "Creates and persists a user given a username, password, and email.
 
   This function validates all parameters and will return a failure message if
@@ -26,9 +26,9 @@
 
   **Example Usage**:
       #!clj
-      (create-user! \"landonjw\" \"foobar123\" \"landonjwdev@gmail.com\")
+      (create-user! \"landonjw\" \"foobar123\" \"landonjwdev@gmail.com\" \"North America\" \"landonjw\")
       ; => {:success? true}
-      (create-user! \"landonjw\" \"foobar123\" \"bademail\")
+      (create-user! \"landonjw\" \"foobar123\" \"bademail\" \"North America\" \"landonjw\")
       ; => {:success? false :message \"Illegal email format\"}
   "
   (let [fail (fn [msg] {:success? false :message msg})
