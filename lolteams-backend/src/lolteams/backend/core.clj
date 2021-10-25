@@ -11,6 +11,7 @@
             [lolteams.backend.handlers.v1.auth :as auth-handler]
             [lolteams.backend.handlers.v1.game-server :as game-server-handler]
             [lolteams.backend.handlers.v1.debug :as debug-handler]
+            [lolteams.backend.handlers.v1.champion :as champion-handler]
             [chime.core :refer [chime-at periodic-seq]]
             [lolteams.backend.middleware.auth :refer [jwt-auth-middleware]]
             [lolteams.backend.middleware.cors :refer [cors-middleware]]
@@ -23,7 +24,7 @@
 (defonce database (atom nil))
 (defonce data-dragon (atom nil))
 
-(defn create-routes [db config]
+(defn create-routes [db config data-dragon]
   (println "Creating routes...")
   (ring/ring-handler
     (ring/router
@@ -37,7 +38,9 @@
          ["/login" {:post (auth-handler/login-user db config)}]
          ["/register" {:post (auth-handler/register-user db config)}]]
         ["/gameserver"
-         ["/all" {:get (game-server-handler/get-all-servers db)}]]]]
+         ["/all" {:get (game-server-handler/get-all-servers db)}]]
+        ["/champion"
+         ["/portrait" {:get (champion-handler/get-portrait-uri data-dragon)}]]]]
       {:data {:muuntaja   muuntaja/instance
               :middleware [format-negotiate-middleware
                            parameters-middleware
@@ -78,7 +81,7 @@
 (defn reset-routes-and-server! []
   (println "Resetting routes and server...")
   (stop-server!)
-  (let [new-routes (create-routes @database @config)
+  (let [new-routes (create-routes @database @config @data-dragon)
         new-server (start-server! @config new-routes)]
     (reset! routes new-routes)
     (reset! server new-server)))
@@ -87,7 +90,7 @@
   (let [new-config (config/create-config!)
         new-data-dragon (data-dragon-store/fetch-data-dragon-data!)
         new-database (create-datasource! new-config)
-        new-routes (create-routes new-database new-config)
+        new-routes (create-routes new-database new-config new-data-dragon)
         new-server (start-server! new-config new-routes)]
     (reset! config new-config)
     (reset! data-dragon new-data-dragon)

@@ -4,7 +4,7 @@
 
 (def root-uri "http://ddragon.leagueoflegends.com")
 
-(defn- cdn-uri [version]
+(defn cdn-uri [version]
   "Builds a URI to the data dragon CDN for a given version.
 
   **Example Usage**:
@@ -13,7 +13,7 @@
   "
   (str root-uri "/cdn/" version "/"))
 
-(defn- fetch-data-dragon-version! []
+(defn fetch-data-dragon-version! []
   "Fetches the latest version of data dragon from the versions endpoint.
 
   **Example Usage**:
@@ -27,7 +27,7 @@
       (json/read-str)
       (first)))
 
-(defn- fetch-champion-data! [version]
+(defn fetch-champion-data! [version]
   "Fetches the champion data from data dragon CDN for a given version.
 
   Returns a map containing all data for champions on the supplied version.
@@ -39,12 +39,12 @@
       (json/read-str :key-fn keyword)
       (:data)))
 
-(defn- champion-uri-name-pair [champion-entry]
+(defn champion-uri-name-pair [champion-entry]
   (let [champion-name (first champion-entry)
         champion-uri-name (:name (second champion-entry))]
     [champion-name champion-uri-name]))
 
-(defn- champion-uri-names [champion-data]
+(defn champion-uri-names [champion-data]
   "Given a map of champion data, this extracts the URI and human-friendly champion names into a new map.
 
   **Example Usage**:
