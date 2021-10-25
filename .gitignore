@@ -18,3 +18,5 @@ lolteams-backend/*.jar
 lolteams-backend/*.class
 lolteams-backend/.lein-*
 lolteams-backend/.nrepl-port
+lolteams-backend/resources/keys/dev_private_key.pem
+lolteams-backend/resources/keys/dev_public_key.pem
