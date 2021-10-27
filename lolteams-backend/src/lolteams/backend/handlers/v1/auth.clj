@@ -43,7 +43,7 @@
       (if errors
         (bad-request errors)
         (if (authenticator/authenticates? db username password)
-          (ok (authenticator/create-auth-token (get-in [:auth :private-key] config) username))
+          (ok (authenticator/create-auth-token (get-in config [:auth :private-key]) username))
           (unauthorized "Authentication error"))))))
 
 (defn unique-username-validator [db]
@@ -139,4 +139,4 @@
               server-id (-> (server-model/abbreviation->game-server db server)
                             (:gameserver/id))]
           (user-model/create-user db username password email server-id in-game-name)
-          (created "/" (authenticator/create-auth-token (get-in [:auth :private-key] config) username)))))))
+          (created "/" (authenticator/create-auth-token (get-in config [:auth :private-key]) username)))))))

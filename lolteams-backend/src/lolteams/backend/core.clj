@@ -12,6 +12,7 @@
             [lolteams.backend.handlers.v1.game-server :as game-server-handler]
             [lolteams.backend.handlers.v1.debug :as debug-handler]
             [lolteams.backend.handlers.v1.champion :as champion-handler]
+            [lolteams.backend.handlers.v1.user :as user-handler]
             [chime.core :refer [chime-at periodic-seq]]
             [lolteams.backend.middleware.auth :refer [jwt-auth-middleware]]
             [lolteams.backend.middleware.cors :refer [cors-middleware]]
@@ -39,6 +40,9 @@
          ["/register" {:post (auth-handler/register-user db config)}]]
         ["/gameserver"
          ["/all" {:get (game-server-handler/get-all-servers db)}]]
+        ["/user"
+         ["/username" {:post (user-handler/get-user-by-username db)
+                       :middleware [#(jwt-auth-middleware config %)]}]]
         ["/champion"
          ["/portrait" {:get (champion-handler/get-portrait-uri data-dragon)}]]]]
       {:data {:muuntaja   muuntaja/instance

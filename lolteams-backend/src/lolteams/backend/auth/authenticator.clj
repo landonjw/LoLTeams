@@ -11,11 +11,13 @@
   ([private-key username]
    (create-auth-token private-key username (time/plus (time/now) (time/days 1))))
   ([private-key username expiration]
-   (jwt/sign {:username (lower-case username)} private-key {:alt :rs256 :exp expiration})))
+   (jwt/sign {:username (lower-case username)} private-key {:alg :rs256 :exp expiration})))
 
 (defn decode-token [public-key token]
   "Decodes a JWT."
-  (jwt/unsign token public-key {:alg :rs256}))
+  (try
+    (jwt/unsign token public-key {:alg :rs256})
+    (catch Exception _ nil)))
 
 (defn decode-for-buddy [public-key _ token]
   "Decodes a JWT. This is only used in middleware."
@@ -37,7 +39,7 @@
     false
     (let [user (user-model/username->user-account db username)]
       (->> user
-           (:useraccount/password)
+           (:password)
            (hashers/verify password)
            (:valid)))))
 
