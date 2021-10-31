@@ -7,6 +7,4 @@
   (token-backend {:authfn #(authenticator/decode-for-buddy (get-in config [:auth :public-key]) %1 %2)}))
 
 (defn jwt-auth-middleware [config handler]
-  (println handler)
-  (println "jwt-auth-middleware")
   (wrap-authentication handler (auth config)))

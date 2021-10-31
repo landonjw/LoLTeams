@@ -67,6 +67,7 @@
       (record->entity)))
 
 (defn create-user [db username password email server-id in-game-name]
+  (println (str username ":" password ":" email ":" server-id ":" in-game-name))
   (jdbc/execute! db
                  ["INSERT INTO UserAccount (Username, Password, Email, GameServerId, InGameName)
                    VALUES (?, ?, ?, ?, ?);" username (hashers/derive password) email server-id in-game-name]))

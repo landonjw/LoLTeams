@@ -2,7 +2,7 @@
   (:require [lolteams.backend.auth.authenticator :as authenticator]
             [ring.util.http-response :refer :all]))
 
-(defn ping [request]
+(defn ping [_]
   "
   Creates a basic endpoint that replies 'Pong'.
 
@@ -12,7 +12,7 @@
     200:
       Body will contain 'Pong'.
   "
-  (ok (:params request)))
+  (ok "Pong"))
 
 (defn ping-with-auth [request]
   "

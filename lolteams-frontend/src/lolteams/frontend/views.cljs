@@ -41,6 +41,16 @@
        [:button.modal-close.is-large {:type     "button"
                                       :on-click #(dispatch [::events/clear-champion-portrait])}]])))
 
+(defn ping-debug []
+  (let [ping-success? (subscribe [::subs/ping-success?])]
+    [:div
+     (cond
+       (= @ping-success? true) [:p "Success!"]
+       (= @ping-success? false) [:p "Failure :("])
+     [:button.button.is-primary {:type "button"
+                                 :on-click #(dispatch [::events/send-ping])}
+      "Send Ping"]]))
+
 (defmulti page identity)
 
 (defmethod page :login []
@@ -51,6 +61,9 @@
 
 (defmethod page :register []
   [auth/register-panel])
+
+(defmethod page :ping-debug []
+  [ping-debug])
 
 (defmethod page :default []
   [:div "No page"])

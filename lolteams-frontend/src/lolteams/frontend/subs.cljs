@@ -36,3 +36,13 @@
   ::debug-mode?
   (fn [db]
     (get db :debug-mode? false)))
+
+(re-frame/reg-sub
+  ::ping-success?
+  (fn [db]
+    (:ping-success? db)))
+
+(re-frame/reg-sub
+  ::available-server-names
+  (fn [db]
+    (map :abbreviation (:game-servers db))))

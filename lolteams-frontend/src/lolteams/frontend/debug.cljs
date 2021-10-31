@@ -7,11 +7,16 @@
 
 (def pages [:login
             :register
-            :forgot-password])
+            :forgot-password
+            :ping-debug])
+
+(defn page-selection-handler [element]
+  (let [page (-> element (form-utils/input->value) (keyword))]
+    (cond
+      (= page :register) (dispatch [::events/load-register-form])
+      :else (dispatch [::events/change-page page]))))
 
 (defn page-navigation-bar []
   (form-utils/select
     pages
-    #(dispatch [::events/change-page (-> %
-                                         (form-utils/input->value)
-                                         (keyword))])))
+    page-selection-handler))

@@ -137,6 +137,6 @@
         (bad-request errors)
         (let [{:keys [username password email server in-game-name]} params
               server-id (-> (server-model/abbreviation->game-server db server)
-                            (:gameserver/id))]
+                            (:id))]
           (user-model/create-user db username password email server-id in-game-name)
           (created "/" (authenticator/create-auth-token (get-in config [:auth :private-key]) username)))))))

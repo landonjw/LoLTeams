@@ -2,6 +2,7 @@
   (:require
     [re-frame.core :refer [subscribe dispatch]]
     [lolteams.frontend.events :as events]
+    [lolteams.frontend.subs :as subs]
     [lolteams.frontend.views.util.forms :refer [input
                                                 input->value
                                                 full-width-button
@@ -37,22 +38,21 @@
     (email-input #(dispatch [::events/forgot-password-form (input->value %)]))
     (full-width-button "Submit" #(dispatch [::events/attempt-forgot-password]))]])
 
-(def available-servers ["NA" "EUW" "EUNE" "KR" "BR" "LAN" "LAS" "OCE" "RU" "TR" "JP"])
-
 (defn register-panel []
-  [:div.container.register-panel
-   [:form.box
-    (email-input #(dispatch [::events/register-form :email (input->value %)]))
-    (username-input #(dispatch [::events/register-form :username (input->value %)]))
-    [:div.columns.is-1
-     [:div.column.is-one-third
-      (select available-servers #())]
-     [:div.column.is-two-thirds
-      (input "In-Game Name" {:on-change #(dispatch [::events/register-form :in-game-name (input->value %)])})]]
-    (input "Password" {:icon       "fa fa-lock"
-                       :input-type "password"
-                       :on-change  #(dispatch [::events/login-input :password (input->value %)])})
-    (input "Confirm Password" {:icon       "fa fa-lock"
-                       :input-type "password"
-                       :on-change  #(dispatch [::events/login-input :password (input->value %)])})
-    (full-width-button "Register" #(dispatch [::events/attempt-register]))]])
+  (let [available-servers (subscribe [::subs/available-server-names])]
+    [:div.container.register-panel
+     [:form.box
+      (email-input #(dispatch [::events/register-form :email (input->value %)]))
+      (username-input #(dispatch [::events/register-form :username (input->value %)]))
+      [:div.columns.is-1
+       [:div.column.is-one-third
+        (select @available-servers #(dispatch [::events/register-form :server (input->value %)]))]
+       [:div.column.is-two-thirds
+        (input "In-Game Name" {:on-change #(dispatch [::events/register-form :in-game-name (input->value %)])})]]
+      (input "Password" {:icon       "fa fa-lock"
+                         :input-type "password"
+                         :on-change  #(dispatch [::events/register-form :password (input->value %)])})
+      (input "Confirm Password" {:icon       "fa fa-lock"
+                                 :input-type "password"
+                                 :on-change  #(dispatch [::events/register-form :confirm-password (input->value %)])})
+      (full-width-button "Register" #(dispatch [::events/attempt-register]))]]))
