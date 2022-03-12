@@ -3,7 +3,8 @@
             [ring.util.http-response :refer :all]
             [lolteams.backend.models.user-account :as user-model]
             [lolteams.backend.models.game-server :as server-model]
-            [lolteams.backend.auth.authenticator :as authenticator]))
+            [lolteams.backend.auth.authenticator :as authenticator]
+            [lolteams.backend.email.email-service :as email-service]))
 
 (def login-schema
   "
@@ -140,3 +141,23 @@
                             (:id))]
           (user-model/create-user db username password email server-id in-game-name)
           (created "/" (authenticator/create-auth-token (get-in config [:auth :private-key]) username)))))))
+
+(defn existing-email-validator [db]
+  {:message "email is not registered to a user"
+   :validate #(not (nil? (user-model/email->user-account db %)))})
+
+(defn send-password-reset-email-schema [db]
+  {:email [st/required st/string good-email-validator (existing-email-validator db)]})
+
+; TODO: Complete
+(defn send-password-reset-email [db config]
+  (fn [{params :body-params}]
+    (let [errors (first (st/validate params (send-password-reset-email-schema db)))]
+      (if errors
+        (bad-request errors)
+        (do
+          (email-service/send-forgot-password-email config)
+          (ok))))))
+
+; Send email, generate a unique code
+; User sends back email, unique code, and new password.

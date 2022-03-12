@@ -16,7 +16,8 @@
                  [buddy/buddy-auth "3.0.1"]
                  [clj-time "0.14.2"]
                  [ring-cors "0.1.13"]
-                 [funcool/struct "1.4.0"]]
+                 [funcool/struct "1.4.0"]
+                 [com.draines/postal "2.0.4"]]
   :main ^:skip-aot lolteams.backend.core
   :plugins [[lein-ring "0.12.5"]]
   :ring {:handler lolteams.backend.core/app}

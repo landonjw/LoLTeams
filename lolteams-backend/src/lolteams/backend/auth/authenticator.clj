@@ -56,3 +56,16 @@
      (if (nil? else-fn)
        (unauthorized)
        (else-fn)))))
+
+(defn generate-random-token
+  ([]
+     (generate-random-token "" 6))
+  ([partial length]
+     (if (<= length 0)
+       ""
+       (if (= (rem length 2) 0)
+         (generate-random-token (str partial (int (rand 10))) (- 1 length))
+         (generate-random-token (str partial (char (+ 65 (rand 26)))) (- 1 length))))))
+
+(defn create-reset-token [email]
+  ())

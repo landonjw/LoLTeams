@@ -51,6 +51,36 @@
                                  :on-click #(dispatch [::events/send-ping])}
       "Send Ping"]]))
 
+(defn navbar []
+  [:nav.navbar {:role "navigation" :aria-label "main navigation"}
+   [:div.navbar-brand
+    [:a.navbar-item
+     [:img {:src "https://bulma.io/images/bulma-logo.png" :width 112 :height 28}]]
+    [:a.navbar-burger {:role "button"
+                       :aria-label "menu"
+                       :aria-expanded false
+                       :data-target "navbarBasicExample"}
+     [:span {:aria-hidden true}]
+     [:span {:aria-hidden true}]
+     [:span {:aria-hidden true}]]]
+   [:div.navbar-menu {:id "navbarBasicExample"}
+    [:div.navbar-start
+     [:a.navbar-item "Team Viewer"]
+     [:a.navbar-item "Player Viewer"]
+     [:div.control.is-loading
+      [:input.input {:placeholder "Search for a team or player" :style {:width "400px"}}]]]]
+   [:div.navbar-end
+    [:div.navbar-item.has-dropdown.is-hoverable
+     [:a.navbar-link "Sample User"]
+     [:div.navbar-dropdown
+      [:a.navbar-item "Sample User"]
+      [:a.navbar-item "Sample Team"]
+      [:hr.navbar-divider]
+      [:a.navbar-item "Create new team"]
+      [:a.navbar-item "Admin panel"]
+      [:hr.navbar-divider]
+      [:a.navbar-item "Log out"]]]]])
+
 (defmulti page identity)
 
 (defmethod page :login []
@@ -64,6 +94,9 @@
 
 (defmethod page :ping-debug []
   [ping-debug])
+
+(defmethod page :navbar []
+  [navbar])
 
 (defmethod page :default []
   [:div "No page"])

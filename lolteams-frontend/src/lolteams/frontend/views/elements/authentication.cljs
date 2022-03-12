@@ -29,7 +29,7 @@
     [:div.center-text
      [:a {:on-click #(dispatch [::events/change-page :forgot-password])} "Forgot your password? Reset here."]]
     [:div.center-text
-     [:a {:on-click #(dispatch [::events/change-page :register])} "New? Register here!"]]]])
+     [:a {:on-click #(dispatch [::events/load-register-form])} "New? Register here!"]]]])
 
 (defn forgot-password []
   [:div.container.forgot-password-panel

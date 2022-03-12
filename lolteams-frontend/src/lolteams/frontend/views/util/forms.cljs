@@ -25,11 +25,14 @@
                         :on-change   on-change}]]]))))
 
 (defn full-width-button [text click-fn]
-  [:button.button.is-primary.full-width {:type "button"
+  [:button.button.is-primary.full-width {:type     "button"
                                          :on-click click-fn}
    text])
 
-(defn select [options on-change-fn]
-  [:div.select.full-width
-   [:select.full-width {:on-change on-change-fn}
-    (map (fn [option] [:option {:value option} option]) options)]])
+(defn select
+  ([options on-change-fn]
+   (select options on-change-fn nil))
+  ([options on-change-fn value]
+   [:div.select.full-width
+    [:select.full-width {:on-change on-change-fn :value (or value "")}
+     (map (fn [option] [:option {:value option :key option} option]) options)]]))

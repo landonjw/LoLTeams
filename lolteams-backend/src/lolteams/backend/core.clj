@@ -37,7 +37,8 @@
           ["/noauth" {:get debug-handler/ping}]]]
         ["/auth"
          ["/login" {:post (auth-handler/login-user db config)}]
-         ["/register" {:post (auth-handler/register-user db config)}]]
+         ["/register" {:post (auth-handler/register-user db config)}]
+         ["/forgotpassword" {:post (auth-handler/send-password-reset-email db config)}]]
         ["/gameserver"
          ["/all" {:get (game-server-handler/get-all-servers db)}]]
         ["/user"

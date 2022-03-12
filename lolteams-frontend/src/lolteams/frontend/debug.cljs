@@ -8,7 +8,8 @@
 (def pages [:login
             :register
             :forgot-password
-            :ping-debug])
+            :ping-debug
+            :navbar])
 
 (defn page-selection-handler [element]
   (let [page (-> element (form-utils/input->value) (keyword))]
@@ -17,6 +18,8 @@
       :else (dispatch [::events/change-page page]))))
 
 (defn page-navigation-bar []
-  (form-utils/select
-    pages
-    page-selection-handler))
+  (let [active-page (subscribe [::subs/active-page])]
+    (form-utils/select
+      pages
+      page-selection-handler
+      @active-page)))

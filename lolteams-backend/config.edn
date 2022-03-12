@@ -7,4 +7,7 @@
  :data-dragon {:version-refresh-rate-minutes 60}
  :auth {:public-key-filename "dev_public_key.pem"
         :private-key-filename "dev_private_key.pem"
-        :passphrase nil}}
+        :passphrase nil}
+ :email-service {:user "lolteamshelp@gmail.com"
+                 :password "lolteams123"
+                 :sender "LolTeams Debug <lolteamshelp@gmail.com>"}}
