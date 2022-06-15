@@ -1,4 +1,4 @@
-(ns lolteams.backend.datadragon.store
+(ns lolteams.backend.services.datadragon
   (:require [clojure.data.json :as json]
             [org.httpkit.client :as http]))
 
@@ -13,7 +13,7 @@
   "
   (str root-uri "/cdn/" version "/"))
 
-(defn fetch-data-dragon-version! []
+(defn fetch-version! []
   "Fetches the latest version of data dragon from the versions endpoint.
 
   **Example Usage**:
@@ -55,10 +55,10 @@
   (->> (map champion-uri-name-pair champion-data)
        (reduce #(assoc %1 (first %2) (second %2)) {})))
 
-(defn fetch-data-dragon-data! []
+(defn fetch-data! []
   "Fetches data from the data dragon CDN and populates a map containing the state used in this application."
   (println "Fetching most recent data dragon data...")
-  (let [version (fetch-data-dragon-version!)]
+  (let [version (fetch-version!)]
     (-> {}
         (assoc :version version)
         (assoc :cdn-uri (cdn-uri version))

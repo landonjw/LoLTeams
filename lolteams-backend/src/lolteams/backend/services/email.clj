@@ -1,4 +1,4 @@
-(ns lolteams.backend.email.email-service
+(ns lolteams.backend.services.email
   (:require [postal.core :as postal]))
 
 (defn create-email-sender [config]

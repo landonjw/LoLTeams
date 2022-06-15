@@ -1,11 +1,11 @@
-(ns lolteams.backend.handlers.auth
+(ns lolteams.backend.handlers.v1.auth_test
   (:require [clojure.test :refer :all]
-            [lolteams.backend.utils :refer [test-config test-database test-routes]]
+            [lolteams.backend.test-seeder :refer [test-config test-database]]
             [lolteams.backend.handlers.v1.auth :as auth-handler]
             [lolteams.backend.models.user-account :as user-model]
             [next.jdbc :as jdbc]))
 
-(testing "login-user"
+(deftest login-user-test
   (testing "valid user credentials produces 200 status code with auth token in body"
     (jdbc/with-transaction [transaction (test-database) {:rollback-only true}]
      (let [response
@@ -58,7 +58,7 @@
          (is (= 400 (:status response)))
          (is (= "this field is mandatory" (get-in response [:body :password]))))))))
 
-(testing "register-user"
+(deftest register-user-test
   (testing "with valid user state produces 201 status code with auth token in body"
     (jdbc/with-transaction [transaction (test-database) {:rollback-only true}]
      (let [response

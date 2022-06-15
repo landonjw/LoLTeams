@@ -13,10 +13,9 @@
             [lolteams.backend.handlers.v1.debug :as debug-handler]
             [lolteams.backend.handlers.v1.champion :as champion-handler]
             [lolteams.backend.handlers.v1.user :as user-handler]
-            [chime.core :refer [chime-at periodic-seq]]
             [lolteams.backend.middleware.auth :refer [jwt-auth-middleware]]
             [lolteams.backend.middleware.cors :refer [cors-middleware]]
-            [lolteams.backend.datadragon.store :as data-dragon-store]
+            [lolteams.backend.services.datadragon :as datadragon-service]
             [next.jdbc :as jdbc]))
 
 (defonce server (atom nil))
@@ -75,7 +74,7 @@
 
 (defn reset-data-dragon! []
   (println "Resetting data dragon...")
-  (reset! data-dragon (data-dragon-store/fetch-data-dragon-data!)))
+  (reset! data-dragon (datadragon-service/fetch-data!)))
 
 (defn restart-server! []
   (println "Restarting server...")
@@ -93,7 +92,7 @@
 
 (defn -main []
   (let [new-config (config/create-config!)
-        new-data-dragon (data-dragon-store/fetch-data-dragon-data!)
+        new-data-dragon (datadragon-service/fetch-data!)
         new-database (create-datasource! new-config)
         new-routes (create-routes new-database new-config new-data-dragon)
         new-server (start-server! new-config new-routes)]

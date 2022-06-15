@@ -4,7 +4,7 @@
             [buddy.hashers :as hashers]
             [lolteams.backend.models.game-server :as server-model]))
 
-(defn record->entity [record]
+(defn- record->entity [record]
   (if record
     {:id           (:useraccountid record)
      :username     (:username record)
@@ -67,7 +67,6 @@
       (record->entity)))
 
 (defn create-user [db username password email server-id in-game-name]
-  (println (str username ":" password ":" email ":" server-id ":" in-game-name))
   (jdbc/execute! db
                  ["INSERT INTO UserAccount (Username, Password, Email, GameServerId, InGameName)
                    VALUES (?, ?, ?, ?, ?);" username (hashers/derive password) email server-id in-game-name]))

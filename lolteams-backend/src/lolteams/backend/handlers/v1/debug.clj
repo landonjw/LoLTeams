@@ -1,5 +1,5 @@
 (ns lolteams.backend.handlers.v1.debug
-  (:require [lolteams.backend.auth.authenticator :as authenticator]
+  (:require [lolteams.backend.services.authentication :as auth-service]
             [ring.util.http-response :refer :all]))
 
 (defn ping [_]
@@ -27,4 +27,4 @@
     401:
       User is not authorized to use the request.
   "
-  (authenticator/if-authorized request #(ok "Pong")))
+  (auth-service/if-authorized request #(ok "Pong")))

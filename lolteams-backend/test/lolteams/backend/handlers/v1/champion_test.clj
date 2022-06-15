@@ -1,9 +1,9 @@
-(ns lolteams.backend.handlers.champion
+(ns lolteams.backend.handlers.v1.champion_test
   (:require [clojure.test :refer :all]
-            [lolteams.backend.utils :refer [test-data-dragon]]
+            [lolteams.backend.test-seeder :refer [test-data-dragon]]
             [lolteams.backend.handlers.v1.champion :as champion-handler]))
 
-(testing "get=portrait-uri"
+(deftest get-portrait-uri-test
   (testing "valid champion returns 200 with body of correct uri"
     (let [response
           ((champion-handler/get-portrait-uri (test-data-dragon))

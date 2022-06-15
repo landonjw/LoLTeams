@@ -2,7 +2,7 @@
  :database-properties {:host     "127.0.0.1"
                        :dbname   "lolteams"
                        :user     "postgres"
-                       :password "landonjw123"
+                       :password "postgres"
                        :port     5432}
  :data-dragon {:version-refresh-rate-minutes 60}
  :auth {:public-key-filename "dev_public_key.pem"

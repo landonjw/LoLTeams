@@ -13,7 +13,7 @@
 
   Response Model:
     200:
-      Body will contain a set of all supporte dLeague of Legends servers.
+      Body will contain a set of all supported League of Legends servers.
   "
   (fn [_]
     (ok (->> (model/get-all-servers db)

@@ -1,4 +1,4 @@
-(ns lolteams.backend.auth.authenticator
+(ns lolteams.backend.services.authentication
   (:require [buddy.sign.jwt :as jwt]
             [clojure.string :refer [lower-case]]
             [clj-time.core :as time]

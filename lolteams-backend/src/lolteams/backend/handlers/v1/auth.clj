@@ -3,8 +3,8 @@
             [ring.util.http-response :refer :all]
             [lolteams.backend.models.user-account :as user-model]
             [lolteams.backend.models.game-server :as server-model]
-            [lolteams.backend.auth.authenticator :as authenticator]
-            [lolteams.backend.email.email-service :as email-service]))
+            [lolteams.backend.services.authentication :as auth-service]
+            [lolteams.backend.services.email :as email-service]))
 
 (def login-schema
   "
@@ -43,8 +43,8 @@
           password (:password params)]
       (if errors
         (bad-request errors)
-        (if (authenticator/authenticates? db username password)
-          (ok (authenticator/create-auth-token (get-in config [:auth :private-key]) username))
+        (if (auth-service/authenticates? db username password)
+          (ok (auth-service/create-auth-token (get-in config [:auth :private-key]) username))
           (unauthorized "Authentication error"))))))
 
 (defn unique-username-validator [db]
@@ -140,7 +140,7 @@
               server-id (-> (server-model/abbreviation->game-server db server)
                             (:id))]
           (user-model/create-user db username password email server-id in-game-name)
-          (created "/" (authenticator/create-auth-token (get-in config [:auth :private-key]) username)))))))
+          (created "/" (auth-service/create-auth-token (get-in config [:auth :private-key]) username)))))))
 
 (defn existing-email-validator [db]
   {:message "email is not registered to a user"
