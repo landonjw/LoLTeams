@@ -27,4 +27,17 @@
     401:
       User is not authorized to use the request.
   "
-  (auth-service/if-authorized request #(ok "Pong")))
+  (auth-service/if-authenticated request #(ok "Pong")))
+
+(def post-request (atom nil))
+(def get-request (atom nil))
+
+(defn post-example [request]
+  (do
+    (reset! post-request request)
+    (ok)))
+
+(defn get-example [request]
+  (do
+    (reset! get-request request)
+    (ok)))

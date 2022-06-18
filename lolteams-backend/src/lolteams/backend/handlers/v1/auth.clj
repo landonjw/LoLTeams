@@ -4,7 +4,8 @@
             [lolteams.backend.models.user-account :as user-model]
             [lolteams.backend.models.game-server :as server-model]
             [lolteams.backend.services.authentication :as auth-service]
-            [lolteams.backend.services.email :as email-service]))
+            [lolteams.backend.services.email :as email-service]
+            [lolteams.backend.util.validation.handler :refer [endpoint]]))
 
 (def login-schema
   "
@@ -37,22 +38,19 @@
     401:
       Username and password match do not succeed in authenticating a registered user.
   "
-  (fn [{params :body-params}]
-    (let [errors (first (st/validate params login-schema))
-          username (:username params)
-          password (:password params)]
-      (if errors
-        (bad-request errors)
-        (if (auth-service/authenticates? db username password)
-          (ok (auth-service/create-auth-token (get-in config [:auth :private-key]) username))
-          (unauthorized "Authentication error"))))))
+  (endpoint [request] {:schema login-schema}
+    (let [username (get-in request [:body-params :username])
+          password (get-in request [:body-params :password])]
+      (if (auth-service/authenticates? db username password)
+        (ok (auth-service/create-auth-token (get-in config [:auth :private-key]) username))
+        (unauthorized "Authentication error")))))
 
 (defn unique-username-validator [db]
   "
   Validates that a user does not currently exist in the database with the given username.
   "
-  {:message "already registered to another user"
-   :validate #(nil? (user-model/username->user-account db %))})
+  {:message  "already registered to another user"
+   :validate #(nil? (user-model/get-by-username db %))})
 
 (def good-password-validator
   "
@@ -78,7 +76,7 @@
   Validates that a user does not currently exist in the database with the given email.
   "
   {:message  "already registered to another user"
-   :validate #(nil? (user-model/email->user-account db %))})
+   :validate #(nil? (user-model/get-by-email db %))})
 
 (defn valid-game-server-validator [db]
   "
@@ -92,7 +90,7 @@
   Validates that a user does not currently exist in the database with the given in-game name.
   "
   {:message  "already registered to another user"
-   :validate #(nil? (user-model/in-game-name->user-account db %))})
+   :validate #(nil? (user-model/get-by-in-game-name db %))})
 
 (defn register-schema [db]
   "
@@ -132,32 +130,27 @@
       The request contains a bad data model.
       Body will include a map with keys of invalid request parameters to values of details on errors caught in data model.
   "
-  (fn [{params :body-params}]
-    (let [errors (first (st/validate params (register-schema db)))]
-      (if errors
-        (bad-request errors)
-        (let [{:keys [username password email server in-game-name]} params
-              server-id (-> (server-model/abbreviation->game-server db server)
-                            (:id))]
-          (user-model/create-user db username password email server-id in-game-name)
-          (created "/" (auth-service/create-auth-token (get-in config [:auth :private-key]) username)))))))
+  (endpoint [request] {:schema (register-schema db)}
+    (let [{:keys [username password email server in-game-name]} (:body-params request)
+          server-id (-> (server-model/abbreviation->game-server db server)
+                        (:id))]
+      (user-model/create-user! db username password email server-id in-game-name)
+      (created "/" (auth-service/create-auth-token (get-in config [:auth :private-key]) username)))))
+
 
 (defn existing-email-validator [db]
-  {:message "email is not registered to a user"
-   :validate #(not (nil? (user-model/email->user-account db %)))})
+  {:message  "email is not registered to a user"
+   :validate #(not (nil? (user-model/get-by-email db %)))})
 
 (defn send-password-reset-email-schema [db]
   {:email [st/required st/string good-email-validator (existing-email-validator db)]})
 
 ; TODO: Complete
 (defn send-password-reset-email [db config]
-  (fn [{params :body-params}]
-    (let [errors (first (st/validate params (send-password-reset-email-schema db)))]
-      (if errors
-        (bad-request errors)
-        (do
-          (email-service/send-forgot-password-email config)
-          (ok))))))
+  (endpoint [request] {:schema (send-password-reset-email-schema db)}
+    (do
+      (email-service/send-forgot-password-email config)
+      (ok))))
 
 ; Send email, generate a unique code
 ; User sends back email, unique code, and new password.

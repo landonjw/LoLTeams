@@ -2,6 +2,12 @@
   (:require [next.jdbc :as jdbc]
             [next.jdbc.result-set :as rs]))
 
+(defn record->entity [record]
+  (if record
+    {:id (:gameserver/id record)
+     :name (:gameserver/name record)
+     :abbreviation (:gameserver/abbreviation record)}))
+
 (defn get-all-servers [db]
   (jdbc/execute! db
                  ["SELECT * FROM GameServer;"]
@@ -18,6 +24,3 @@
                      ["SELECT * FROM GameServer WHERE Abbreviation = ?;" abbreviation]
                      {:builder-fn rs/as-unqualified-lower-maps})
       (first)))
-
-(defn entity->dto [server]
-  (dissoc server :id))

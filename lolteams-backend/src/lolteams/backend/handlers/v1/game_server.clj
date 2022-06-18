@@ -17,5 +17,4 @@
   "
   (fn [_]
     (ok (->> (model/get-all-servers db)
-             (map model/entity->dto)
              (into [])))))

@@ -2,8 +2,33 @@ DO
 $$
 BEGIN
 
+DROP TABLE IF EXISTS RBAC_UserRole;
 DROP TABLE IF EXISTS UserAccount;
 DROP TABLE IF EXISTS GameServer;
+DROP TABLE IF EXISTS RBAC_RolePermission;
+DROP TABLE IF EXISTS RBAC_Role;
+DROP TABLE IF EXISTS RBAC_Permission;
+
+CREATE TABLE RBAC_Permission
+(
+    Id       serial PRIMARY KEY,
+    Name     VARCHAR(50) UNIQUE NOT NULL,
+    Comments VARCHAR(255)
+);
+
+CREATE TABLE RBAC_Role
+(
+    Id       serial PRIMARY KEY,
+    Name     VARCHAR(50) UNIQUE NOT NULL,
+    Comments VARCHAR(255)
+);
+
+CREATE TABLE RBAC_RolePermission
+(
+    Id           serial PRIMARY KEY,
+    RoleId       INTEGER REFERENCES RBAC_Role (Id)       NOT NULL,
+    PermissionId INTEGER REFERENCES RBAC_Permission (Id) NOT NULL
+);
 
 CREATE TABLE GameServer
 (
@@ -33,6 +58,13 @@ CREATE TABLE UserAccount
     Email        VARCHAR(255) UNIQUE                NOT NULL,
     GameServerId INTEGER REFERENCES GameServer (Id) NOT NULL,
     InGameName   VARCHAR(16) UNIQUE                 NOT NULL
+);
+
+CREATE TABLE RBAC_UserRole
+(
+    Id            serial PRIMARY KEY,
+    UserAccountId INTEGER REFERENCES UserAccount (Id) NOT NULL,
+    RoleId        INTEGER REFERENCES UserAccount (Id) NOT NULL
 );
 
 INSERT INTO UserAccount (Username, Password, Email, GameServerId, InGameName)

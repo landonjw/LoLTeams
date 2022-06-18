@@ -74,7 +74,7 @@
   (testing "with invalid username produces 400 status with reason in body"
     (testing "taken username"
       (jdbc/with-transaction [transaction (test-database) {:rollback-only true}]
-       (user-model/create-user transaction "testaccount" "testpass123" "example1@example.com" 1 "testaccount1")
+       (user-model/create-user! transaction "testaccount" "testpass123" "example1@example.com" 1 "testaccount1")
        (let [response
              ((auth-handler/register-user transaction (test-config))
               {:body-params {:username     "testaccount"
@@ -207,7 +207,7 @@
 
     (testing "taken email"
       (jdbc/with-transaction [transaction (test-database) {:rollback-only true}]
-       (user-model/create-user transaction "testaccount1" "testpass123" "example@example.com" 1 "testaccount1")
+       (user-model/create-user! transaction "testaccount1" "testpass123" "example@example.com" 1 "testaccount1")
        (let [response
              ((auth-handler/register-user transaction (test-config))
               {:body-params {:username     "testaccount2"
@@ -280,7 +280,7 @@
   (testing "with invalid in-game name produces 400 status with reason in body"
     (testing "taken in-game name"
       (jdbc/with-transaction [transaction (test-database) {:rollback-only true}]
-       (user-model/create-user transaction "testaccount1" "testpass123" "example@example.com" 1 "testaccount1")
+       (user-model/create-user! transaction "testaccount1" "testpass123" "example@example.com" 1 "testaccount1")
        (let [response
              ((auth-handler/register-user transaction (test-config))
               {:body-params {:username     "testaccount2"

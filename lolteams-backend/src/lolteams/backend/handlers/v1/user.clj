@@ -5,7 +5,8 @@
 
 (defn get-user-by-username [db]
   (fn [{params :body-params :as request}]
-    (auth-service/if-authorized request
-      #(ok
-         (-> (user-model/username->user-account db (:username params))
-             (user-model/entity->dto))))))
+    (auth-service/if-authenticated request
+      #(->> (:username params)
+            (user-model/get-by-username db)
+            (user-model/entity->dto)
+            (ok)))))

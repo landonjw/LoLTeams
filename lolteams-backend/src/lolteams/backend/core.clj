@@ -2,6 +2,8 @@
   (:require [org.httpkit.server :refer [run-server]]
             [lolteams.backend.config :as config]
             [reitit.ring :as ring]
+            [ring.middleware.params :refer [wrap-params]]
+            [ring.middleware.keyword-params :refer [wrap-keyword-params]]
             [reitit.ring.middleware.exception :refer [exception-middleware]]
             [reitit.ring.middleware.muuntaja :refer [format-negotiate-middleware
                                                      format-response-middleware
@@ -16,7 +18,8 @@
             [lolteams.backend.middleware.auth :refer [jwt-auth-middleware]]
             [lolteams.backend.middleware.cors :refer [cors-middleware]]
             [lolteams.backend.services.datadragon :as datadragon-service]
-            [next.jdbc :as jdbc]))
+            [next.jdbc :as jdbc]
+            [reitit.ring.coercion :as coercion]))
 
 (defonce server (atom nil))
 (defonce routes (atom nil))
@@ -33,7 +36,9 @@
          ["/ping"
           ["/auth" {:get        debug-handler/ping-with-auth
                     :middleware [#(jwt-auth-middleware config %)]}]
-          ["/noauth" {:get debug-handler/ping}]]]
+          ["/noauth" {:get debug-handler/ping}]]
+         ["/postexample" {:post debug-handler/post-example}]
+         ["/getexample" {:get debug-handler/get-example}]]
         ["/auth"
          ["/login" {:post (auth-handler/login-user db config)}]
          ["/register" {:post (auth-handler/register-user db config)}]

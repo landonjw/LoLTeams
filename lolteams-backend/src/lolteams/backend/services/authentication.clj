@@ -7,7 +7,8 @@
             [buddy.hashers :as hashers]))
 
 (defn create-auth-token
-  "Creates a JWT after a user has authenticated."
+  "Creates a JWT after a user has authenticated.
+   If expiration time is not specified, defaults to a duration of one day."
   ([private-key username]
    (create-auth-token private-key username (time/plus (time/now) (time/days 1))))
   ([private-key username expiration]
@@ -24,7 +25,7 @@
   (when-let [result (decode-token public-key token)]
     (assoc result :token token)))
 
-(defn authorized? [request]
+(defn authenticated? [request]
   "
   Checks if a request is authorized.
   This identity boolean is added to the request from middleware.
@@ -37,21 +38,21 @@
   "
   (if (or (empty? username) (empty? password))
     false
-    (let [user (user-model/username->user-account db username)]
+    (let [user (user-model/get-by-username db username)]
       (->> user
            (:password)
            (hashers/verify password)
            (:valid)))))
 
-(defn if-authorized
+(defn if-authenticated
   "
   Checks if a user is authorized to make the request, and executes a function if they are.
   Otherwise, if specified, it will execute another function, or return an unauthorized http response.
   "
   ([request fn]
-   (if-authorized request fn nil))
+   (if-authenticated request fn nil))
   ([request fn else-fn]
-   (if (authorized? request)
+   (if (authenticated? request)
      (fn)
      (if (nil? else-fn)
        (unauthorized)
@@ -68,4 +69,5 @@
          (generate-random-token (str partial (char (+ 65 (rand 26)))) (- 1 length))))))
 
 (defn create-reset-token [email]
+  ;TODO
   ())
