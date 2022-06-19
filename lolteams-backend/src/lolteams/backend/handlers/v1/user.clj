@@ -4,9 +4,9 @@
             [lolteams.backend.models.user-account :as user-model]))
 
 (defn get-user-by-username [db]
-  (fn [{params :body-params :as request}]
+  (fn [{params :params :as request}]
     (auth-service/if-authenticated request
-      #(->> (:username params)
+      #(->> (get params "username")
             (user-model/get-by-username db)
             (user-model/entity->dto)
             (ok)))))

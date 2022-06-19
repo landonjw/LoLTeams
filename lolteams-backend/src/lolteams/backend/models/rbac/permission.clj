@@ -1,6 +1,5 @@
 (ns lolteams.backend.models.rbac.permission
-  (:require [next.jdbc :as jdbc]
-            [next.jdbc.sql :as sql]))
+  (:require [next.jdbc :as jdbc]))
 
 (defn record->entity [record]
   (if record
@@ -31,13 +30,21 @@
 (defn get-permissions-for-user [db user-id]
   (->> (jdbc/execute! db ["SELECT RBAC_Permission.Id,
                            RBAC_Permission.Name,
-                           RBAC_Permission.Comment
+                           RBAC_Permission.Comments
                            FROM RBAC_Permission
-                           LEFT JOIN RBAC_UserPermission ON RBAC_Permission.Id = RBAC_UserPermission.PermissionId
                            LEFT JOIN RBAC_RolePermission ON RBAC_Permission.Id = RBAC_RolePermission.PermissionId
                            LEFT JOIN RBAC_Role ON RBAC_RolePermission.RoleId = RBAC_Role.Id
                            LEFT JOIN RBAC_UserRole ON RBAC_Role.Id = RBAC_UserRole.RoleId
-                           LEFT JOIN UserAccount ON RBAC_UserRole.UserAccountId = UserAccount.Id OR RBAC_UserPermission.UserAccountId = UserAccount.Id
+                           LEFT JOIN UserAccount ON RBAC_UserRole.UserAccountId = UserAccount.Id
                            WHERE UserAccount.Id = ?;" user-id])
        (map record->entity)
        (into [])))
+
+(defn create-permission! [db permission]
+  (->>
+    (jdbc/execute! db ["INSERT INTO RBAC_Permission (Name, Comments)
+                        VALUES (?, ?);" (:name permission) (:comments permission)]
+                   {:return-keys true})
+    (first)
+    (:rbac_permission/id)
+    (assoc permission :id)))

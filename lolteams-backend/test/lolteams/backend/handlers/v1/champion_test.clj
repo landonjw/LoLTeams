@@ -1,4 +1,4 @@
-(ns lolteams.backend.handlers.v1.champion_test
+(ns lolteams.backend.handlers.v1.champion-test
   (:require [clojure.test :refer :all]
             [lolteams.backend.test-seeder :refer [test-data-dragon]]
             [lolteams.backend.handlers.v1.champion :as champion-handler]))

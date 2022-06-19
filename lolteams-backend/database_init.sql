@@ -1,3 +1,5 @@
+-- Temporary script to delete and construct the database. Should be automated later on alongside addition of migrations.
+
 DO
 $$
 BEGIN

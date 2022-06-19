@@ -1,66 +1,66 @@
-(ns lolteams.backend.handlers.v1.auth_test
+(ns lolteams.backend.handlers.v1.auth-test
   (:require [clojure.test :refer :all]
-            [lolteams.backend.test-seeder :refer [test-config test-database]]
+            [lolteams.backend.test-seeder :refer [test-config]]
             [lolteams.backend.handlers.v1.auth :as auth-handler]
             [lolteams.backend.models.user-account :as user-model]
-            [next.jdbc :as jdbc]))
+            [lolteams.backend.test-utils :refer [with-test-db create-test-user]]))
 
 (deftest login-user-test
   (testing "valid user credentials produces 200 status code with auth token in body"
-    (jdbc/with-transaction [transaction (test-database) {:rollback-only true}]
+    (with-test-db
      (let [response
            ((auth-handler/login-user transaction (test-config))
             {:body-params {:username     "landonjw"
                            :password     "landonjw123"}})]
-       (is (= 200 (:status response)))
+       (is (= (:status response) 200))
        (is (not (nil? (:body response)))))))
 
   (testing "valid username with incorrect password produces 401"
-    (jdbc/with-transaction [transaction (test-database) {:rollback-only true}]
+    (with-test-db
      (let [response
            ((auth-handler/login-user transaction (test-config))
             {:body-params {:username     "landonjw"
                            :password     "badpassword"}})]
-       (is (= 401 (:status response))))))
+       (is (= (:status response) 401)))))
 
   (testing "invalid request data produces 401"
     (testing "username is not a string"
-      (jdbc/with-transaction [transaction (test-database) {:rollback-only true}]
+      (with-test-db
          (let [response
                ((auth-handler/login-user transaction (test-config))
                 {:body-params {:username     12345
                                :password     "badpassword"}})]
-           (is (= 400 (:status response)))
-           (is (= "must be a string" (get-in response [:body :username]))))))
+           (is (= (:status response) 400))
+           (is (= (get-in response [:body :username]) "must be a string")))))
 
     (testing "no username"
-      (jdbc/with-transaction [transaction (test-database) {:rollback-only true}]
+      (with-test-db
        (let [response
              ((auth-handler/login-user transaction (test-config))
               {:body-params {:password     "badpassword"}})]
-         (is (= 400 (:status response)))
-         (is (= "this field is mandatory" (get-in response [:body :username]))))))
+         (is (= (:status response) 400))
+         (is (= (get-in response [:body :username]) "this field is mandatory")))))
 
     (testing "password is not a string"
-      (jdbc/with-transaction [transaction (test-database) {:rollback-only true}]
+      (with-test-db
        (let [response
              ((auth-handler/login-user transaction (test-config))
               {:body-params {:username     "landonjw"
                              :password     12345}})]
-         (is (= 400 (:status response)))
-         (is (= "must be a string" (get-in response [:body :password]))))))
+         (is (= (:status response) 400))
+         (is (= (get-in response [:body :password]) "must be a string")))))
 
     (testing "no password"
-      (jdbc/with-transaction [transaction (test-database) {:rollback-only true}]
+      (with-test-db
        (let [response
              ((auth-handler/login-user transaction (test-config))
               {:body-params {:username     "landonjw"}})]
-         (is (= 400 (:status response)))
-         (is (= "this field is mandatory" (get-in response [:body :password]))))))))
+         (is (= (:status response) 400))
+         (is (= (get-in response [:body :password]) "this field is mandatory")))))))
 
 (deftest register-user-test
   (testing "with valid user state produces 201 status code with auth token in body"
-    (jdbc/with-transaction [transaction (test-database) {:rollback-only true}]
+    (with-test-db
      (let [response
            ((auth-handler/register-user transaction (test-config))
             {:body-params {:username     "testaccount"
@@ -68,25 +68,25 @@
                            :email        "example@example.com"
                            :server       "NA"
                            :in-game-name "testaccount"}})]
-       (is (= 201 (:status response)))
+       (is (= (:status response) 201))
        (is (not (nil? (:body response)))))))
 
   (testing "with invalid username produces 400 status with reason in body"
     (testing "taken username"
-      (jdbc/with-transaction [transaction (test-database) {:rollback-only true}]
-       (user-model/create-user! transaction "testaccount" "testpass123" "example1@example.com" 1 "testaccount1")
-       (let [response
+      (with-test-db
+       (let [test-user (user-model/create-user! transaction (create-test-user))
+             response
              ((auth-handler/register-user transaction (test-config))
-              {:body-params {:username     "testaccount"
+              {:body-params {:username     (:username test-user)
                              :password     "testpass123"
                              :email        "example2@example.com"
                              :server       "NA"
                              :in-game-name "testaccount2"}})]
-         (is (= 400 (:status response)))
-         (is (= "already registered to another user" (get-in response [:body :username]))))))
+         (is (= (:status response) 400))
+         (is (= (get-in response [:body :username]) "already registered to another user")))))
 
     (testing "username with less than 3 characters"
-      (jdbc/with-transaction [transaction (test-database) {:rollback-only true}]
+      (with-test-db
        (let [response
              ((auth-handler/register-user transaction (test-config))
               {:body-params {:username     "te"
@@ -94,11 +94,11 @@
                              :email        "example2@example.com"
                              :server       "NA"
                              :in-game-name "testaccount2"}})]
-         (is (= 400 (:status response)))
-         (is (= "less than the minimum 3" (get-in response [:body :username]))))))
+         (is (= (:status response) 400))
+         (is (= (get-in response [:body :username]) "less than the minimum 3")))))
 
     (testing "username with more than 16 characters"
-      (jdbc/with-transaction [transaction (test-database) {:rollback-only true}]
+      (with-test-db
        (let [response
              ((auth-handler/register-user transaction (test-config))
               {:body-params {:username     "testaccount1234567"
@@ -106,11 +106,11 @@
                              :email        "example2@example.com"
                              :server       "NA"
                              :in-game-name "testaccount2"}})]
-         (is (= 400 (:status response)))
-         (is (= "longer than the maximum 16" (get-in response [:body :username]))))))
+         (is (= (:status response) 400))
+         (is (= (get-in response [:body :username]) "longer than the maximum 16")))))
 
     (testing "username that isnt a string"
-      (jdbc/with-transaction [transaction (test-database) {:rollback-only true}]
+      (with-test-db
        (let [response
              ((auth-handler/register-user transaction (test-config))
               {:body-params {:username     123421
@@ -118,23 +118,23 @@
                              :email        "example2@example.com"
                              :server       "NA"
                              :in-game-name "testaccount2"}})]
-         (is (= 400 (:status response)))
-         (is (= "must be a string" (get-in response [:body :username]))))))
+         (is (= (:status response) 400))
+         (is (= (get-in response [:body :username]) "must be a string")))))
 
     (testing "no username"
-      (jdbc/with-transaction [transaction (test-database) {:rollback-only true}]
+      (with-test-db
        (let [response
              ((auth-handler/register-user transaction (test-config))
               {:body-params {:password     "testpass123"
                              :email        "example2@example.com"
                              :server       "NA"
                              :in-game-name "testaccount2"}})]
-         (is (= 400 (:status response)))
-         (is (= "this field is mandatory" (get-in response [:body :username])))))))
+         (is (= (:status response) 400))
+         (is (= (get-in response [:body :username]) "this field is mandatory"))))))
 
   (testing "with invalid password produces 400 status with reason in body"
     (testing "password that isnt a string"
-      (jdbc/with-transaction [transaction (test-database) {:rollback-only true}]
+      (with-test-db
        (let [response
              ((auth-handler/register-user transaction (test-config))
               {:body-params {:username     "testaccount"
@@ -142,11 +142,11 @@
                              :email        "example@example.com"
                              :server       "NA"
                              :in-game-name "testaccount"}})]
-         (is (= 400 (:status response)))
-         (is (= "must be a string" (get-in response [:body :password]))))))
+         (is (= (:status response) 400))
+         (is (= (get-in response [:body :password]) "must be a string")))))
 
     (testing "password that is less than 8 characters"
-      (jdbc/with-transaction [transaction (test-database) {:rollback-only true}]
+      (with-test-db
        (let [response
              ((auth-handler/register-user transaction (test-config))
               {:body-params {:username     "testaccount"
@@ -154,11 +154,11 @@
                              :email        "example@example.com"
                              :server       "NA"
                              :in-game-name "testaccount"}})]
-         (is (= 400 (:status response)))
-         (is (= "less than the minimum 8" (get-in response [:body :password]))))))
+         (is (= (:status response) 400))
+         (is (= (get-in response [:body :password]) "less than the minimum 8")))))
 
     (testing "password that doesnt have a letter"
-      (jdbc/with-transaction [transaction (test-database) {:rollback-only true}]
+      (with-test-db
        (let [response
              ((auth-handler/register-user transaction (test-config))
               {:body-params {:username     "testaccount"
@@ -166,11 +166,11 @@
                              :email        "example@example.com"
                              :server       "NA"
                              :in-game-name "testaccount"}})]
-         (is (= 400 (:status response)))
-         (is (= "must have at least one number and one letter" (get-in response [:body :password]))))))
+         (is (= (:status response) 400))
+         (is (= (get-in response [:body :password]) "must have at least one number and one letter")))))
 
     (testing "password that doesnt have a number"
-      (jdbc/with-transaction [transaction (test-database) {:rollback-only true}]
+      (with-test-db
        (let [response
              ((auth-handler/register-user transaction (test-config))
               {:body-params {:username     "testaccount"
@@ -178,23 +178,23 @@
                              :email        "example@example.com"
                              :server       "NA"
                              :in-game-name "testaccount"}})]
-         (is (= 400 (:status response)))
-         (is (= "must have at least one number and one letter" (get-in response [:body :password]))))))
+         (is (= (:status response) 400))
+         (is (= (get-in response [:body :password]) "must have at least one number and one letter")))))
 
     (testing "no password"
-      (jdbc/with-transaction [transaction (test-database) {:rollback-only true}]
+      (with-test-db
        (let [response
              ((auth-handler/register-user transaction (test-config))
               {:body-params {:username     "testaccount"
                              :email        "example@example.com"
                              :server       "NA"
                              :in-game-name "testaccount"}})]
-         (is (= 400 (:status response)))
-         (is (= "this field is mandatory" (get-in response [:body :password])))))))
+         (is (= (:status response) 400))
+         (is (= (get-in response [:body :password]) "this field is mandatory"))))))
 
   (testing "with invalid email produces 400 status with reason in body"
     (testing "email that isnt a string"
-      (jdbc/with-transaction [transaction (test-database) {:rollback-only true}]
+      (with-test-db
        (let [response
              ((auth-handler/register-user transaction (test-config))
               {:body-params {:username     "testaccount"
@@ -202,24 +202,24 @@
                              :email        12342343245
                              :server       "NA"
                              :in-game-name "testaccount"}})]
-         (is (= 400 (:status response)))
-         (is (= "must be a string" (get-in response [:body :email]))))))
+         (is (= (:status response) 400))
+         (is (= (get-in response [:body :email]) "must be a string")))))
 
     (testing "taken email"
-      (jdbc/with-transaction [transaction (test-database) {:rollback-only true}]
-       (user-model/create-user! transaction "testaccount1" "testpass123" "example@example.com" 1 "testaccount1")
-       (let [response
+      (with-test-db
+       (let [test-user (user-model/create-user! transaction (create-test-user))
+             response
              ((auth-handler/register-user transaction (test-config))
               {:body-params {:username     "testaccount2"
                              :password     "testpass123"
-                             :email        "example@example.com"
+                             :email        (:email test-user)
                              :server       "NA"
                              :in-game-name "testaccount2"}})]
-         (is (= 400 (:status response)))
-         (is (= "already registered to another user" (get-in response [:body :email]))))))
+         (is (= (:status response) 400))
+         (is (= (get-in response [:body :email]) "already registered to another user")))))
 
     (testing "invalid email (no @)"
-      (jdbc/with-transaction [transaction (test-database) {:rollback-only true}]
+      (with-test-db
        (let [response
              ((auth-handler/register-user transaction (test-config))
               {:body-params {:username     "testaccount"
@@ -227,23 +227,23 @@
                              :email        "bademail"
                              :server       "NA"
                              :in-game-name "testaccount"}})]
-         (is (= 400 (:status response)))
-         (is (= "not a valid email" (get-in response [:body :email]))))))
+         (is (= (:status response) 400))
+         (is (= (get-in response [:body :email]) "not a valid email")))))
 
     (testing "no email"
-      (jdbc/with-transaction [transaction (test-database) {:rollback-only true}]
+      (with-test-db
        (let [response
              ((auth-handler/register-user transaction (test-config))
               {:body-params {:username     "testaccount"
                              :password     "testpass123"
                              :server       "NA"
                              :in-game-name "testaccount"}})]
-         (is (= 400 (:status response)))
-         (is (= "this field is mandatory" (get-in response [:body :email])))))))
+         (is (= (:status response) 400))
+         (is (= (get-in response [:body :email]) "this field is mandatory"))))))
 
   (testing "with invalid server produces 400 status with reason in body"
     (testing "no server in database with abbreviation"
-      (jdbc/with-transaction [transaction (test-database) {:rollback-only true}]
+      (with-test-db
        (let [response
              ((auth-handler/register-user transaction (test-config))
               {:body-params {:username     "testaccount"
@@ -251,22 +251,22 @@
                              :email        "example@example.com"
                              :server       "EXAMPLE"
                              :in-game-name "testaccount"}})]
-         (is (= 400 (:status response)))
-         (is (= "game server is not valid or unsupported" (get-in response [:body :server]))))))
+         (is (= (:status response) 400))
+         (is (= (get-in response [:body :server]) "game server is not valid or unsupported")))))
 
     (testing "no server"
-      (jdbc/with-transaction [transaction (test-database) {:rollback-only true}]
+      (with-test-db
        (let [response
              ((auth-handler/register-user transaction (test-config))
               {:body-params {:username     "testaccount"
                              :password     "foobar123"
                              :email        "example@example.com"
                              :in-game-name "testaccount"}})]
-         (is (= 400 (:status response)))
-         (is (= "this field is mandatory" (get-in response [:body :server]))))))
+         (is (= (:status response) 400))
+         (is (= (get-in response [:body :server]) "this field is mandatory")))))
 
     (testing "server that isnt a string"
-      (jdbc/with-transaction [transaction (test-database) {:rollback-only true}]
+      (with-test-db
        (let [response
              ((auth-handler/register-user transaction (test-config))
               {:body-params {:username     "testaccount"
@@ -274,13 +274,13 @@
                              :email        "example@example.com"
                              :server       1234
                              :in-game-name "testaccount"}})]
-         (is (= 400 (:status response)))
-         (is (= "must be a string" (get-in response [:body :server])))))))
+         (is (= (:status response) 400))
+         (is (= (get-in response [:body :server]) "must be a string"))))))
 
   (testing "with invalid in-game name produces 400 status with reason in body"
     (testing "taken in-game name"
-      (jdbc/with-transaction [transaction (test-database) {:rollback-only true}]
-       (user-model/create-user! transaction "testaccount1" "testpass123" "example@example.com" 1 "testaccount1")
+      (with-test-db
+       (user-model/create-user! transaction (create-test-user))
        (let [response
              ((auth-handler/register-user transaction (test-config))
               {:body-params {:username     "testaccount2"
@@ -288,11 +288,11 @@
                              :email        "example2@example.com"
                              :server       "NA"
                              :in-game-name "testaccount1"}})]
-         (is (= 400 (:status response)))
-         (is (= "already registered to another user" (get-in response [:body :in-game-name]))))))
+         (is (= (:status response) 400))
+         (is (= (get-in response [:body :in-game-name]) "already registered to another user")))))
 
     (testing "in-game name that is less than 3 characters"
-      (jdbc/with-transaction [transaction (test-database) {:rollback-only true}]
+      (with-test-db
        (let [response
              ((auth-handler/register-user transaction (test-config))
               {:body-params {:username     "testaccount"
@@ -300,11 +300,11 @@
                              :email        "example@example.com"
                              :server       "NA"
                              :in-game-name "te"}})]
-         (is (= 400 (:status response)))
-         (is (= "less than the minimum 3" (get-in response [:body :in-game-name]))))))
+         (is (= (:status response) 400))
+         (is (= (get-in response [:body :in-game-name]) "less than the minimum 3")))))
 
     (testing "in-game name that is more than 16 characters"
-      (jdbc/with-transaction [transaction (test-database) {:rollback-only true}]
+      (with-test-db
        (let [response
              ((auth-handler/register-user transaction (test-config))
               {:body-params {:username     "testaccount"
@@ -312,11 +312,11 @@
                              :email        "example@example.com"
                              :server       "NA"
                              :in-game-name "testaccount123456"}})]
-         (is (= 400 (:status response)))
-         (is (= "longer than the maximum 16" (get-in response [:body :in-game-name]))))))
+         (is (= (:status response) 400))
+         (is (= (get-in response [:body :in-game-name]) "longer than the maximum 16")))))
 
     (testing "in-game name that isnt a string"
-      (jdbc/with-transaction [transaction (test-database) {:rollback-only true}]
+      (with-test-db
        (let [response
              ((auth-handler/register-user transaction (test-config))
               {:body-params {:username     "testaccount"
@@ -324,16 +324,16 @@
                              :email        "example@example.com"
                              :server       "NA"
                              :in-game-name 1234}})]
-         (is (= 400 (:status response)))
-         (is (= "must be a string" (get-in response [:body :in-game-name]))))))
+         (is (= (:status response) 400))
+         (is (= (get-in response [:body :in-game-name]) "must be a string")))))
 
     (testing "no in-game name"
-      (jdbc/with-transaction [transaction (test-database) {:rollback-only true}]
+      (with-test-db
        (let [response
              ((auth-handler/register-user transaction (test-config))
               {:body-params {:username     "testaccount"
                              :password     "foobar123"
                              :email        "example@example.com"
                              :server       "NA"}})]
-         (is (= 400 (:status response)))
-         (is (= "this field is mandatory" (get-in response [:body :in-game-name]))))))))
+         (is (= (:status response) 400))
+         (is (= (get-in response [:body :in-game-name]) "this field is mandatory")))))))

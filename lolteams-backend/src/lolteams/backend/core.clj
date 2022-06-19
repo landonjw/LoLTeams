@@ -2,8 +2,6 @@
   (:require [org.httpkit.server :refer [run-server]]
             [lolteams.backend.config :as config]
             [reitit.ring :as ring]
-            [ring.middleware.params :refer [wrap-params]]
-            [ring.middleware.keyword-params :refer [wrap-keyword-params]]
             [reitit.ring.middleware.exception :refer [exception-middleware]]
             [reitit.ring.middleware.muuntaja :refer [format-negotiate-middleware
                                                      format-response-middleware
@@ -15,11 +13,11 @@
             [lolteams.backend.handlers.v1.debug :as debug-handler]
             [lolteams.backend.handlers.v1.champion :as champion-handler]
             [lolteams.backend.handlers.v1.user :as user-handler]
+            [lolteams.backend.handlers.v1.rbac :as rbac-handler]
             [lolteams.backend.middleware.auth :refer [jwt-auth-middleware]]
             [lolteams.backend.middleware.cors :refer [cors-middleware]]
             [lolteams.backend.services.datadragon :as datadragon-service]
-            [next.jdbc :as jdbc]
-            [reitit.ring.coercion :as coercion]))
+            [next.jdbc :as jdbc]))
 
 (defonce server (atom nil))
 (defonce routes (atom nil))
@@ -45,11 +43,13 @@
          ["/forgotpassword" {:post (auth-handler/send-password-reset-email db config)}]]
         ["/gameserver"
          ["/all" {:get (game-server-handler/get-all-servers db)}]]
-        ["/user"
-         ["/username" {:post (user-handler/get-user-by-username db)
-                       :middleware [#(jwt-auth-middleware config %)]}]]
+        ["/user" {:get (user-handler/get-user-by-username db)
+                  :middleware [#(jwt-auth-middleware config %)]}]
         ["/champion"
-         ["/portrait" {:get (champion-handler/get-portrait-uri data-dragon)}]]]]
+         ["/portrait" {:get (champion-handler/get-portrait-uri data-dragon)}]]
+        ["/rbac"
+         ["/permissions-for-user" {:get (rbac-handler/get-permissions-for-user db)
+                                   :middleware [#(jwt-auth-middleware config %)]}]]]]
       {:data {:muuntaja   muuntaja/instance
               :middleware [format-negotiate-middleware
                            parameters-middleware

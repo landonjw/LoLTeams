@@ -9,6 +9,8 @@
 (defn get-schema-errors [request schema]
   (first (validate (:body-params request) schema)))
 
+; TODO: Figure out how to handle GET requests for the schema validation
+
 (defmacro endpoint
   ([[request] body]
    `(endpoint [request] {} body))
@@ -23,25 +25,3 @@
               (bad-request errors#)
               ~body))
         :else ~body))))
-
-;(defmacro endpoint
-;  ([[request] body]
-;   `(endpoint [request] {} body))
-;  ([[request] options body]
-;   `(fn [~'request]
-;      (cond
-;        (and (:requires-authentication? ~options) (is-not-authenticated?)) (unauthorized)
-;        (and (:required-roles ~options) (not-authorized?)) (unauthorized)
-;        (and (:schema ~options) (schema-invalid?)) (bad-request)
-;        :else ~body))))
-
-;(def example-endpoint-schema
-;  {:foo [st/required st/string]
-;   :bar [st/required st/integer]})
-;
-
-;(def example-endpoint
-;  (endpoint [request] {:requires-authentication? true
-;                       :required-roles           ["ExampleAdmin1" "ExampleAdmin2"]
-;                       :schema                   example-endpoint-schema}
-;            (ok (+ 1 (get-in request [:params :bar])))))

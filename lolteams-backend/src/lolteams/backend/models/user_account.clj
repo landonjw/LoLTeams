@@ -13,7 +13,11 @@
      :game-server  (game-server/record->entity record)}))
 
 (defn entity->dto [entity]
-  (dissoc entity :password))
+  "Converts the user entity to a DTO that can be sent to the front-end.
+   This should sanitize any sensitive data."
+  (-> entity
+      (dissoc :password)
+      (dissoc :email)))
 
 (defn get-by-username [db username]
   (-> (jdbc/execute! db
@@ -63,10 +67,14 @@
       (first)
       (record->entity)))
 
-(defn create-user! [db username password email server-id in-game-name]
-  (jdbc/execute! db
-                 ["INSERT INTO UserAccount (Username, Password, Email, GameServerId, InGameName)
-                   VALUES (?, ?, ?, ?, ?);" username (hashers/derive password) email server-id in-game-name]))
+(defn create-user! [db {:keys [username password email server-id in-game-name] :as user}]
+  (->>
+    (jdbc/execute! db ["INSERT INTO UserAccount (Username, Password, Email, GameServerId, InGameName)
+                        VALUES (?, ?, ?, ?, ?);" username (hashers/derive password) email server-id in-game-name]
+                   {:return-keys true})
+    (first)
+    (:useraccount/id)
+    (assoc user :id)))
 
 (defn update-user! [db user]
   (let [id (:id user)

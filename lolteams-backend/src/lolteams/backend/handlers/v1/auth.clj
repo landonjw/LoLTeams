@@ -134,7 +134,7 @@
     (let [{:keys [username password email server in-game-name]} (:body-params request)
           server-id (-> (server-model/abbreviation->game-server db server)
                         (:id))]
-      (user-model/create-user! db username password email server-id in-game-name)
+      (user-model/create-user! db {:id 0 :username username :password password :email email :server-id server-id :in-game-name in-game-name})
       (created "/" (auth-service/create-auth-token (get-in config [:auth :private-key]) username)))))
 
 
